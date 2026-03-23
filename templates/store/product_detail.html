@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Flipzon | {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="detail">
+    <div class="detail-image">
+        {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+        {% else %}
+        <div>{{ product.name }}</div>
+        {% endif %}
+    </div>
+
+    <div class="panel">
+        <span class="badge">{{ product.category.name }}</span>
+        <h1>{{ product.name }}</h1>
+        <p>{{ product.description }}</p>
+        <div class="price-row">
+            <span class="price">Rs. {{ product.final_price }}</span>
+            {% if product.discount_price %}
+            <span class="price-old">Rs. {{ product.price }}</span>
+            <span class="badge">{{ product.discount_percent }}% off</span>
+            {% endif %}
+        </div>
+        <p class="stock">
+            {% if product.in_stock %}
+            In stock: {{ product.stock }} available
+            {% else %}
+            Out of stock
+            {% endif %}
+        </p>
+        <div class="hero-actions">
+            <a class="button primary" href="{% url 'store:product_list' %}">Back to products</a>
+        </div>
+    </div>
+</div>
+
+<section>
+    <div class="section-head">
+        <div>
+            <h2>Related Products</h2>
+            <p>More items from the same category.</p>
+        </div>
+    </div>
+    {% include "store/partials/product_grid.html" with products=related %}
+</section>
+{% endblock %}

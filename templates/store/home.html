@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Flipzon | Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <span class="badge">Fresh picks for everyday shopping</span>
+    <h1>Flipzon makes your store feel real on day one.</h1>
+    <p>Browse featured products, jump into categories, and manage inventory through the Django admin. This starter storefront is ready for your catalog.</p>
+    <div class="hero-actions">
+        <a class="button primary" href="{% url 'store:product_list' %}">Shop all products</a>
+        <a class="button secondary" href="/admin/">Open admin</a>
+    </div>
+</section>
+
+<section>
+    <div class="section-head">
+        <div>
+            <h2>Browse Categories</h2>
+            <p>Start with the sections you want to showcase.</p>
+        </div>
+    </div>
+    {% if categories %}
+    <div class="grid">
+        {% for category in categories %}
+        <a class="card" href="{% url 'store:product_list' %}?category={{ category.slug }}">
+            <div class="card-body">
+                <span class="badge">{{ category.name }}</span>
+                <p>{{ category.description|default:"No description added yet." }}</p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">No categories yet. Add some from the admin panel.</div>
+    {% endif %}
+</section>
+
+<section>
+    <div class="section-head">
+        <div>
+            <h2>Featured Products</h2>
+            <p>Highlighted items customers should notice first.</p>
+        </div>
+    </div>
+    {% include "store/partials/product_grid.html" with products=featured %}
+</section>
+
+<section>
+    <div class="section-head">
+        <div>
+            <h2>Latest Products</h2>
+            <p>Recently added items from your store catalog.</p>
+        </div>
+    </div>
+    {% include "store/partials/product_grid.html" with products=latest %}
+</section>
+{% endblock %}
