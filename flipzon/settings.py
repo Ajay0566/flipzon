@@ -23,7 +23,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.environ.get(
-        "ALLOWED_HOSTS", "localhost,127.0.0.1,flipzon.onrender.com"
+        "ALLOWED_HOSTS", "localhost,127.0.0.1,.onrender.com"
     ).split(",")
     if host.strip()
 ]
@@ -108,7 +108,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
-        "CSRF_TRUSTED_ORIGINS", "https://flipzon.onrender.com"
+        "CSRF_TRUSTED_ORIGINS", "https://*.onrender.com"
     ).split(",")
     if origin.strip()
 ]
