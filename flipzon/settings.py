@@ -1,12 +1,33 @@
+import os
 from pathlib import Path
+
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
+
+try:
+    import whitenoise  # noqa: F401
+except ImportError:
+    whitenoise = None
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-day1-flipzon-key-change-in-production"
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "django-insecure-day1-flipzon-key-change-in-production"
+)
 
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        "ALLOWED_HOSTS", "localhost,127.0.0.1,flipzon.onrender.com"
+    ).split(",")
+    if host.strip()
+]
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -28,6 +49,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+if whitenoise:
+    MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+
 ROOT_URLCONF = "flipzon.urls"
 
 TEMPLATES = [
@@ -48,12 +72,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "flipzon.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if dj_database_url:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
@@ -63,8 +96,25 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+if whitenoise:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get(
+        "CSRF_TRUSTED_ORIGINS", "https://flipzon.onrender.com"
+    ).split(",")
+    if origin.strip()
+]
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
